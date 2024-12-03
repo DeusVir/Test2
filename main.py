@@ -123,75 +123,27 @@ def give_weekly_bonus():
 
 def update_count_with_cps():
     cursor = db.cursor()
-
     try:
-
         cursor.execute(f"SELECT {', '.join(upgrade_names)} FROM clicks WHERE user_id = ?", (st.session_state.user_id,))
-
-
-
-
         result = cursor.fetchone()
-
-
         if result:
-
-
-
             cps = 0
-
-
-
             for i, upgrade_name in enumerate(upgrade_names):
-
-
-
-
-                 if result[i] == 1:
-
-
-
-
-                      if upgrades_info[upgrade_name].get('cps'):
-
-
-
-                           cps += upgrades_info[upgrade_name].get('cps', 0)
-
-
-
-
-
-
-            st.session_state.cps = cps
-
-
-
-
-
+                if result[i] == 1:
+                    if 'cps' in upgrades_info[upgrade_name]:
+                        cps += upgrades_info[upgrade_name]['cps']
 
             st.session_state.count += cps
 
-
-            cursor.execute("UPDATE clicks SET count = ? WHERE user_id = ?", (st.session_state.count, st.session_state.user_id,))
-
-
-
+            cursor.execute("UPDATE clicks SET count = ? WHERE user_id = ?", (st.session_state.count, st.session_state.user_id))
             db.commit()
 
-
-
+            st.session_state.cps = cps
             return cps
 
     except Exception as e:
-
-
-
-
         print("ERROR applying update count with cps", e)
-
         return 0
-
 
 
 def increment():
