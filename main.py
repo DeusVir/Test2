@@ -52,21 +52,6 @@ if 'user_id' not in st.session_state:
     st.session_state.user_id = secrets.token_hex(8)
 
 user_data = get_user_data(st.session_state.user_id)
-
-if 'count' not in st.session_state:
-    st.session_state.count = user_data[0]
-if 'last_bonus_time' not in st.session_state:
-    st.session_state.last_bonus_time = user_data[1]
-if 'upgrades' not in st.session_state:
-    upgrades = {}
-    for index, upgrade_name in enumerate(upgrade_names):
-        upgrades[upgrade_name] = user_data[2 + index]
-    st.session_state.upgrades = upgrades
-if 'cps' not in st.session_state:
-    st.session_state.cps = 0
-if 'cpc' not in st.session_state:
-    st.session_state.cpc = 1
-
 upgrades_info = {
     "fedorov_ml": {"name": "Федоров Мл.", "description": "Дает 10000 бонусов в неделю", "cost": 100000, "cps": 0, "weekly_bonus": 10000, "image": "default.png"},
     "fedorov_str": {"name": "Федоров Стр.", "description": "+20 кликов в секунду", "cost": 2500, "cps": 20, "weekly_bonus": 0, "image": "default.png"},
@@ -82,6 +67,21 @@ upgrades_info = {
 
 
 upgrade_names = list(upgrades_info.keys())
+if 'count' not in st.session_state:
+    st.session_state.count = user_data[0]
+if 'last_bonus_time' not in st.session_state:
+    st.session_state.last_bonus_time = user_data[1]
+if 'upgrades' not in st.session_state:
+    upgrades = {}
+    for index, upgrade_name in enumerate(upgrade_names):
+        upgrades[upgrade_name] = user_data[2 + index]
+    st.session_state.upgrades = upgrades
+if 'cps' not in st.session_state:
+    st.session_state.cps = 0
+if 'cpc' not in st.session_state:
+    st.session_state.cpc = 1
+
+
 
 
 def give_weekly_bonus():
