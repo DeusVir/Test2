@@ -5,9 +5,8 @@ import secrets
 import datetime
 import sqlite3
 
-DATABASE = 'clicker_data.db'  # Имя файла базы данных
+DATABASE = 'clicker_data.db'
 
-# Функция для подключения к базе данных
 def get_db():
     db = getattr(st.session_state, '_database', None)
     if db is None:
@@ -32,148 +31,136 @@ def get_db():
         db.commit()
     return db
 
-@st.cache_resource  # Кешируем соединение с БД
+@st.cache_resource
 def init_connection():
     return get_db()
 
+db = init_connection()
 
-db = init_connection() #initialize on startup
-
-# Функция для получения данных из базы данных
 def get_user_data(user_id):
-
     cursor = db.cursor()
-
     cursor.execute("SELECT count, last_bonus_time, fedorov_ml, fedorov_str, korneeva, epihin, zharkova, sokolova, kozhukhov, novikov, harach, volkov FROM clicks WHERE user_id = ?", (user_id,))
     result = cursor.fetchone()
-
-
-
     if result:
-
         return result
-
-
     else:
-
-
-
-
         cursor.execute("INSERT INTO clicks (user_id) VALUES (?)", (user_id,))
-
-
-
-
         db.commit()
-
         return (0, None, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
-
-
-# Инициализация состояния с данными из БД
 if 'user_id' not in st.session_state:
     st.session_state.user_id = secrets.token_hex(8)
 
-
 user_data = get_user_data(st.session_state.user_id)
 
-
-
 if 'count' not in st.session_state:
-
-
     st.session_state.count = user_data[0]
-
-
 if 'last_bonus_time' not in st.session_state:
-
-
-  st.session_state.last_bonus_time = user_data[1]
-
-
-
+    st.session_state.last_bonus_time = user_data[1]
 if 'upgrades' not in st.session_state:
-
-   upgrades = {}
-
-   for index,upgrade_name in  enumerate(upgrade_names):
-
-      upgrades[upgrade_name] = user_data[2+index] # slice starting from 2 for upgrades
-
-
-
-
-
-   st.session_state.upgrades = upgrades
+    upgrades = {}
+    for index, upgrade_name in enumerate(upgrade_names):
+        upgrades[upgrade_name] = user_data[2 + index]
+    st.session_state.upgrades = upgrades
 if 'cps' not in st.session_state:
     st.session_state.cps = 0
 if 'cpc' not in st.session_state:
     st.session_state.cpc = 1
 
-
-
-# Upgrades info (без изменений)
-
-
+upgrades_info = {
+    "fedorov_ml": {"name": "Федоров Мл.", "description": "Дает 10000 бонусов в неделю", "cost": 100000, "cps": 0, "weekly_bonus": 10000, "image": "default.png"},
+    "fedorov_str": {"name": "Федоров Стр.", "description": "+20 кликов в секунду", "cost": 2500, "cps": 20, "weekly_bonus": 0, "image": "default.png"},
+    "korneeva": {"name": "Корнеева", "description": "+50 кликов в секунду", "cost": 5, "cps": 50, "weekly_bonus": 0, "image": "default.png"},
+    "epihin": {"name": "Епихин", "description": "+10 кликов в секунду", "cost": 1000, "cps": 10, "weekly_bonus": 0, "image": "default.png"},
+    "zharkova": {"name": "Жаркова", "description": "+60 кликов в секунду", "cost": 25000, "cps": 60, "weekly_bonus": 0, "image": "default.png"},
+    "sokolova": {"name": "Соколова", "description": "+15 кликов в секунду", "cost": 800, "cps": 15, "weekly_bonus": 0, "image": "default.png"},
+    "kozhukhov": {"name": "Кожухов", "description": "+1 клик за клик", "cost": 10, "cpc": 1, "weekly_bonus": 0, "image": "default.png"},
+    "novikov": {"name": "Новиков", "description": "+70 кликов в секунду", "cost": 10000, "cps": 70, "weekly_bonus": 0, "image": "default.png"},
+    "harach": {"name": "Харач", "description": "+2 клика в секунду и +10000 бонусов в неделю", "cost": 15000, "cps": 2, "weekly_bonus": 10000, "image": "default.png"},
+    "volkov": {"name": "Волков", "description": "+5 кликов в секунду", "cost": 13500, "cps": 5, "weekly_bonus": 0, "image": "default.png"}
+}
 
 
 upgrade_names = list(upgrades_info.keys())
 
 
 def give_weekly_bonus():
- # ... (без изменений)
-                if bonus > 0:
+    now = datetime.datetime.now()
+    if st.session_state.last_bonus_time:
+        time_diff = now - st.session_state.last_bonus_time
+        if time_diff >= datetime.timedelta(days=7):
+            bonus = 0
+            for upgrade_name in upgrade_names:
+                if st.session_state.upgrades[upgrade_name] == 1 and upgrades_info[upgrade_name].get('weekly_bonus'):
+                    bonus += upgrades_info[upgrade_name]['weekly_bonus']
+            st.session_state.count += bonus
+            st.session_state.last_bonus_time = now
 
-                    cursor = db.cursor() #Get the database cursor
+            cursor = db.cursor()
+            cursor.execute("UPDATE clicks SET count = ?, last_bonus_time = ? WHERE user_id = ?", (st.session_state.count, now, st.session_state.user_id))
+            db.commit()
 
-                    cursor.execute("UPDATE clicks SET count = count + ?, last_bonus_time = ? WHERE user_id = ?", (bonus, now, st.session_state.user_id))
+    else:
+        bonus = 0
 
-                    db.commit()
+        for upgrade_name in upgrade_names:
+          if st.session_state.upgrades[upgrade_name] == 1 and upgrades_info[upgrade_name].get('weekly_bonus'):
+            bonus += upgrades_info[upgrade_name]['weekly_bonus']
 
-
-        else: # ..(без изменений)
-
-
-
-
-
-            if bonus > 0:
-             cursor = db.cursor()
-
-
-
-             cursor.execute("UPDATE clicks SET count = count + ?, last_bonus_time = ? WHERE user_id = ?", (bonus, now, st.session_state.user_id))
-
-
-
-
-             db.commit()
+        st.session_state.count += bonus
 
 
+        st.session_state.last_bonus_time = now
 
-#update_count_with_cps(db.cursor())
+        cursor = db.cursor()
+        cursor.execute("UPDATE clicks SET count = ?, last_bonus_time = ?  WHERE user_id = ?", (st.session_state.count, now, st.session_state.user_id))
+
+        db.commit()
+
+
+
+
 
 def update_count_with_cps():
-
-
     cursor = db.cursor()
+
     try:
+
         cursor.execute(f"SELECT {', '.join(upgrade_names)} FROM clicks WHERE user_id = ?", (st.session_state.user_id,))
 
+
+
+
         result = cursor.fetchone()
+
+
         if result:
 
+
+
             cps = 0
+
+
 
             for i, upgrade_name in enumerate(upgrade_names):
 
 
 
+
                  if result[i] == 1:
+
+
+
+
                       if upgrades_info[upgrade_name].get('cps'):
 
 
+
                            cps += upgrades_info[upgrade_name].get('cps', 0)
+
+
+
+
 
 
             st.session_state.cps = cps
@@ -181,16 +168,16 @@ def update_count_with_cps():
 
 
 
-            cursor.execute("UPDATE clicks SET count = count + ? WHERE user_id = ?", (cps, st.session_state.user_id))
 
 
-            db.commit() #Commit database changes
+            st.session_state.count += cps
+
+
+            cursor.execute("UPDATE clicks SET count = ? WHERE user_id = ?", (st.session_state.count, st.session_state.user_id,))
 
 
 
-
-
-            st.session_state.count = st.session_state.count+ cps
+            db.commit()
 
 
 
@@ -199,46 +186,40 @@ def update_count_with_cps():
     except Exception as e:
 
 
+
+
         print("ERROR applying update count with cps", e)
+
         return 0
 
+
+
 def increment():
- #Increment count in database and then update state
-
-
 
 
     try:
 
 
-
-
      cursor = db.cursor()
 
+     st.session_state.count += st.session_state.cpc
 
 
 
-     cursor.execute("UPDATE clicks SET count = count + ? WHERE user_id = ?", (st.session_state.cpc, st.session_state.user_id,))
-
-     db.commit() # Very important - commits database queries made so far
+     cursor.execute("UPDATE clicks SET count = ? WHERE user_id = ?", (st.session_state.count, st.session_state.user_id,))
 
 
 
-
-     st.session_state.count +=st.session_state.cpc
+     db.commit()
 
     except Exception as e:
-
-
 
        print(e)
 
 
+update_count_with_cps()
 
 
-
-
-# Отображение счетчика
 
 
 st.title("Simple Clicker")
@@ -248,49 +229,24 @@ st.write(f"Count: {st.session_state.count}")
 
 
 
-
-# Кнопка клика
-
-
-
-st.button("Click me!", on_click=increment, type="primary") #Change appearance
-
+st.button("Click me!", on_click=increment, type="primary")
 
 
 st.write(f"Clicks per second: {st.session_state.cps}")
 
 
 
-
 placeholder = st.empty()
 
 
-
-
-
-
-#Autoclick
-
-
-
-
 i = 0
-
-
-
 
 
 def auto_click():
 
  give_weekly_bonus()
 
-
-
-
-
  new_cps = update_count_with_cps()
- time.sleep(1/new_cps) if new_cps > 0 else time.sleep(1)
-
 
 
 
@@ -298,17 +254,15 @@ def auto_click():
 
  global i
 
+
  i+=1
  placeholder.text(f'{st.session_state.count}')
 
 
 
- #st.write("Now your clicksPerSecond are = "+ str(new_cps))
 
+ time.sleep(1/new_cps if new_cps >0 else 1 )
 
-
-
- time.sleep(1)
 
 
 
@@ -316,9 +270,67 @@ def auto_click():
 
 
 
-auto_click() # run once to give initial clicks
-
+auto_click() #One time run
 
 
 
 st.experimental_rerun()
+
+
+
+
+st.title('Магазин')
+
+
+
+for upgrade_name, upgrade in upgrades_info.items():
+
+
+
+  if st.session_state.upgrades[upgrade_name] == 0:
+        if st.button(f"Buy {upgrade['name']} for {upgrade['cost']}"):
+            can_buy = st.session_state.count >= upgrade['cost']
+
+            if can_buy:
+
+               cursor = db.cursor()
+
+
+               st.session_state.upgrades[upgrade_name] = 1
+
+               st.session_state.count -= upgrade['cost']
+
+
+
+               cursor.execute("UPDATE clicks SET count = ?, {} = 1 WHERE user_id = ?".format(upgrade_name),(st.session_state.count, st.session_state.user_id))
+
+
+
+
+               db.commit()
+               st.session_state.cpc += upgrade.get('cpc', 0)
+               update_count_with_cps()
+               st.experimental_rerun()
+
+
+
+            else:
+
+
+
+              st.write("you cannot buy this yet.")
+
+
+
+
+st.write("Your orioks now:"+str(st.session_state.count))
+
+
+
+for upgrade in upgrade_names:
+
+
+
+  if st.session_state['upgrades'][upgrade] == 1:
+
+     st.write("Your purchased widget: " + upgrade)
