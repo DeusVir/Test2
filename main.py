@@ -148,7 +148,12 @@ def auto_click(db):
     placeholder.text(f'{st.session_state.count}')
     time.sleep(1 / new_cps if new_cps > 0 else 1)
 
+
+# Initialize autoclick and update immediately (added)
+
+
 auto_click(db)
+
 st.experimental_rerun()
 
 st.title('Магазин')
@@ -158,27 +163,45 @@ for upgrade_name, upgrade in upgrades_info.items():
         if st.button(f"Buy {upgrade['name']} for {upgrade['cost']}"):
             can_buy = st.session_state.count >= upgrade['cost']
             if can_buy:
-                db_shop = init_connection()
-                cursor = db_shop.cursor()
+                cursor = db.cursor()
+
                 st.session_state.upgrades[upgrade_name] = 1
+
                 st.session_state.count -= upgrade['cost']
+
                 cursor.execute("UPDATE clicks SET count = ?, {} = 1 WHERE user_id = ?".format(upgrade_name), (st.session_state.count, st.session_state.user_id))
-                db_shop.commit()
+
+
+
+                db.commit()
+
+
 
                 st.session_state.cpc += upgrade.get('cpc', 0)
-                update_count_with_cps(db) # pass the database connection
 
 
+
+
+
+
+                update_count_with_cps(db)
 
                 st.experimental_rerun()
+
+
+
+
             else:
                 st.write("you cannot buy this yet.")
 
+
 st.write("Your orioks now:" + str(st.session_state.count))
+
 
 for upgrade in upgrade_names:
     if st.session_state['upgrades'][upgrade] == 1:
         st.write("Your purchased widget: " + upgrade)
+
 
 
 db.close()
