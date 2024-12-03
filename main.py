@@ -102,21 +102,14 @@ def give_weekly_bonus():
 
     else:
         bonus = 0
-
         for upgrade_name in upgrade_names:
-          if st.session_state.upgrades[upgrade_name] == 1 and upgrades_info[upgrade_name].get('weekly_bonus'):
-            bonus += upgrades_info[upgrade_name]['weekly_bonus']
-
+            if st.session_state.upgrades[upgrade_name] == 1 and upgrades_info[upgrade_name].get('weekly_bonus'):
+                bonus += upgrades_info[upgrade_name]['weekly_bonus']
         st.session_state.count += bonus
-
-
         st.session_state.last_bonus_time = now
-
         cursor = db.cursor()
-        cursor.execute("UPDATE clicks SET count = ?, last_bonus_time = ?  WHERE user_id = ?", (st.session_state.count, now, st.session_state.user_id))
-
+        cursor.execute("UPDATE clicks SET count = ?, last_bonus_time = ? WHERE user_id = ?", (st.session_state.count, now, st.session_state.user_id))
         db.commit()
-
 
 
 
