@@ -7,37 +7,30 @@ import sqlite3
 
 DATABASE = 'clicker_data.db'
 
-def get_db():
-    db = getattr(st.session_state, '_database', None)
-    if db is None:
-        db = st.session_state._database = sqlite3.connect(DATABASE)
-        db.execute('''
-            CREATE TABLE IF NOT EXISTS clicks (
-                user_id TEXT PRIMARY KEY,
-                count INTEGER DEFAULT 0,
-                last_bonus_time TIMESTAMP,
-                fedorov_ml INTEGER DEFAULT 0,
-                fedorov_str INTEGER DEFAULT 0,
-                korneeva INTEGER DEFAULT 0,
-                epihin INTEGER DEFAULT 0,
-                zharkova INTEGER DEFAULT 0,
-                sokolova INTEGER DEFAULT 0,
-                kozhukhov INTEGER DEFAULT 0,
-                novikov INTEGER DEFAULT 0,
-                harach INTEGER DEFAULT 0,
-                volkov INTEGER DEFAULT 0
-            )
-        ''')
-        db.commit()
+def init_connection():
+    db = sqlite3.connect(DATABASE)
+    db.execute('''
+        CREATE TABLE IF NOT EXISTS clicks (
+            user_id TEXT PRIMARY KEY,
+            count INTEGER DEFAULT 0,
+            last_bonus_time TIMESTAMP,
+            fedorov_ml INTEGER DEFAULT 0,
+            fedorov_str INTEGER DEFAULT 0,
+            korneeva INTEGER DEFAULT 0,
+            epihin INTEGER DEFAULT 0,
+            zharkova INTEGER DEFAULT 0,
+            sokolova INTEGER DEFAULT 0,
+            kozhukhov INTEGER DEFAULT 0,
+            novikov INTEGER DEFAULT 0,
+            harach INTEGER DEFAULT 0,
+            volkov INTEGER DEFAULT 0
+        )
+    ''')
+    db.commit()
     return db
 
-@st.cache_resource
-def init_connection():
-    return get_db()
-
-db = init_connection()
-
 def get_user_data(user_id):
+    db = init_connection()
     cursor = db.cursor()
     cursor.execute("SELECT count, last_bonus_time, fedorov_ml, fedorov_str, korneeva, epihin, zharkova, sokolova, kozhukhov, novikov, harach, volkov FROM clicks WHERE user_id = ?", (user_id,))
     result = cursor.fetchone()
@@ -93,6 +86,7 @@ def give_weekly_bonus():
                     bonus += upgrades_info[upgrade_name]['weekly_bonus']
             st.session_state.count += bonus
             st.session_state.last_bonus_time = now
+            db = init_connection()  # get new connection here!
             cursor = db.cursor()
             cursor.execute("UPDATE clicks SET count = ?, last_bonus_time = ? WHERE user_id = ?", (st.session_state.count, now, st.session_state.user_id))
             db.commit()
@@ -102,16 +96,12 @@ def give_weekly_bonus():
         for upgrade_name in upgrade_names:
             if st.session_state.upgrades[upgrade_name] == 1 and upgrades_info[upgrade_name].get('weekly_bonus'):
                 bonus += upgrades_info[upgrade_name]['weekly_bonus']
+
         st.session_state.count += bonus
         st.session_state.last_bonus_time = now
-
-
+        db = init_connection()   # Moved here
         cursor = db.cursor()
-
-
-
-
-        cursor.execute("UPDATE clicks SET count = ?, last_bonus_time = ?  WHERE user_id = ?",(st.session_state.count, now,st.session_state.user_id))
+        cursor.execute("UPDATE clicks SET count = ?, last_bonus_time = ?  WHERE user_id = ?", (st.session_state.count, now, st.session_state.user_id))
 
 
 
@@ -119,12 +109,8 @@ def give_weekly_bonus():
 
 
 
-
-
 def update_count_with_cps():
-
-
-
+    db = init_connection() # get db connection here
     cursor = db.cursor()
 
 
@@ -132,11 +118,7 @@ def update_count_with_cps():
     try:
 
 
-
         cursor.execute(f"SELECT {', '.join(upgrade_names)} FROM clicks WHERE user_id = ?", (st.session_state.user_id,))
-
-
-
 
         result = cursor.fetchone()
 
@@ -144,32 +126,28 @@ def update_count_with_cps():
 
 
         if result:
-
             cps = 0
 
 
 
-
             for i, upgrade_name in enumerate(upgrade_names):
-
-
-
-
-
                 if result[i] == 1:
 
-                    if 'cps' in upgrades_info[upgrade_name]:
+
+                  if 'cps' in upgrades_info[upgrade_name]:
 
 
-
-
-                        cps += upgrades_info[upgrade_name]['cps']
-
-
+                     cps += upgrades_info[upgrade_name]['cps']
             st.session_state.count += cps
+
+
+
+
             cursor.execute("UPDATE clicks SET count = ? WHERE user_id = ?", (st.session_state.count, st.session_state.user_id))
 
             db.commit()
+
+
 
 
 
@@ -180,16 +158,9 @@ def update_count_with_cps():
             return cps
 
 
-
-
-
     except Exception as e:
 
-
-
-
         print("ERROR applying update count with cps", e)
-
 
 
 
@@ -197,9 +168,12 @@ def update_count_with_cps():
         return 0
 
 
+
 def increment():
+    db = init_connection()
+    cursor = db.cursor()
     try:
-        cursor = db.cursor()
+
         st.session_state.count += st.session_state.cpc
         cursor.execute("UPDATE clicks SET count = ? WHERE user_id = ?", (st.session_state.count, st.session_state.user_id,))
         db.commit()
@@ -209,7 +183,11 @@ def increment():
 update_count_with_cps()
 
 st.title("Simple Clicker")
+
 st.write(f"Count: {st.session_state.count}")
+
+
+
 st.button("Click me!", on_click=increment, type="primary")
 st.write(f"Clicks per second: {st.session_state.cps}")
 
@@ -220,12 +198,7 @@ placeholder = st.empty()
 
 
 i = 0
-
-
-
-
 def auto_click():
-
 
 
     give_weekly_bonus()
@@ -234,19 +207,28 @@ def auto_click():
 
     new_cps = update_count_with_cps()
 
+
+
+
+
     global i
+
+
     i += 1
 
+
     placeholder.text(f'{st.session_state.count}')
+    time.sleep(1/new_cps if new_cps >0 else 1)
 
 
-    time.sleep(1/new_cps if new_cps > 0 else 1)
+
 
 
 auto_click()
 
 
 st.experimental_rerun()
+
 
 
 
@@ -258,74 +240,68 @@ st.title('Магазин')
 for upgrade_name, upgrade in upgrades_info.items():
 
 
+
   if st.session_state.upgrades[upgrade_name] == 0:
 
 
 
-      if st.button(f"Buy {upgrade['name']} for {upgrade['cost']}"):
+        if st.button(f"Buy {upgrade['name']} for {upgrade['cost']}"):
 
 
 
 
-            can_buy = st.session_state.count >= upgrade['cost']
+           can_buy = st.session_state.count >= upgrade['cost']
+
+
+           if can_buy:
+
+            db = init_connection()
+
+            cursor = db.cursor()
+
+            st.session_state.upgrades[upgrade_name] = 1
+
+
+            st.session_state.count -= upgrade['cost']
 
 
 
 
-            if can_buy:
-
-
-               cursor = db.cursor()
-
-
-               st.session_state.upgrades[upgrade_name] = 1
-
-
-               st.session_state.count -= upgrade['cost']
-
-
-
-
-               cursor.execute("UPDATE clicks SET count = ?, {} = 1 WHERE user_id = ?".format(upgrade_name), (st.session_state.count, st.session_state.user_id))
-
-
-
-               db.commit()
-
-
-               st.session_state.cpc += upgrade.get('cpc', 0)
-
-
-
-               update_count_with_cps()
+            cursor.execute("UPDATE clicks SET count = ?, {} = 1 WHERE user_id = ?".format(upgrade_name),(st.session_state.count,st.session_state.user_id))
 
 
 
 
 
-               st.experimental_rerun()
+            db.commit()
+
+            st.session_state.cpc += upgrade.get('cpc', 0)
 
 
 
-            else:
+            update_count_with_cps()
 
 
-               st.write("you cannot buy this yet.")
+            st.experimental_rerun()
 
 
+
+
+
+           else:
+
+
+
+
+
+              st.write("you cannot buy this yet.")
 
 
 
 st.write("Your orioks now:"+str(st.session_state.count))
 
-
-
 for upgrade in upgrade_names:
-
-
-
-
     if st.session_state['upgrades'][upgrade] == 1:
 
 
-      st.write("Your purchased widget: " + upgrade)
+       st.write("Your purchased widget: " + upgrade)
