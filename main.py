@@ -40,6 +40,19 @@ def get_user_data(user_id, db):
         db.commit()
         return (0, None, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
+upgrades_info = {
+    "fedorov_ml": {"name": "Федоров Мл.", "description": "Дает 10000 бонусов в неделю", "cost": 100000, "cps": 0, "weekly_bonus": 10000, "image": "default.png"},
+    "fedorov_str": {"name": "Федоров Стр.", "description": "+20 кликов в секунду", "cost": 2500, "cps": 20, "weekly_bonus": 0, "image": "default.png"},
+    "korneeva": {"name": "Корнеева", "description": "+50 кликов в секунду", "cost": 5, "cps": 50, "weekly_bonus": 0, "image": "default.png"},
+    "epihin": {"name": "Епихин", "description": "+10 кликов в секунду", "cost": 1000, "cps": 10, "weekly_bonus": 0, "image": "default.png"},
+    "zharkova": {"name": "Жаркова", "description": "+60 кликов в секунду", "cost": 25000, "cps": 60, "weekly_bonus": 0, "image": "default.png"},
+    "sokolova": {"name": "Соколова", "description": "+15 кликов в секунду", "cost": 800, "cps": 15, "weekly_bonus": 0, "image": "default.png"},
+    "kozhukhov": {"name": "Кожухов", "description": "+1 клик за клик", "cost": 10, "cpc": 1, "weekly_bonus": 0, "image": "default.png"},
+    "novikov": {"name": "Новиков", "description": "+70 кликов в секунду", "cost": 10000, "cps": 70, "weekly_bonus": 0, "image": "default.png"},
+    "harach": {"name": "Харач", "description": "+2 клика в секунду и +10000 бонусов в неделю", "cost": 15000, "cps": 2, "weekly_bonus": 10000, "image": "default.png"},
+    "volkov": {"name": "Волков", "description": "+5 кликов в секунду", "cost": 13500, "cps": 5, "weekly_bonus": 0, "image": "default.png"}
+}
+upgrade_names = list(upgrades_info.keys()) 
 if 'user_id' not in st.session_state:
     st.session_state.user_id = secrets.token_hex(8)
 
@@ -60,20 +73,8 @@ if 'cps' not in st.session_state:
 if 'cpc' not in st.session_state:
     st.session_state.cpc = 1
 
-upgrades_info = {
-    "fedorov_ml": {"name": "Федоров Мл.", "description": "Дает 10000 бонусов в неделю", "cost": 100000, "cps": 0, "weekly_bonus": 10000, "image": "default.png"},
-    "fedorov_str": {"name": "Федоров Стр.", "description": "+20 кликов в секунду", "cost": 2500, "cps": 20, "weekly_bonus": 0, "image": "default.png"},
-    "korneeva": {"name": "Корнеева", "description": "+50 кликов в секунду", "cost": 5, "cps": 50, "weekly_bonus": 0, "image": "default.png"},
-    "epihin": {"name": "Епихин", "description": "+10 кликов в секунду", "cost": 1000, "cps": 10, "weekly_bonus": 0, "image": "default.png"},
-    "zharkova": {"name": "Жаркова", "description": "+60 кликов в секунду", "cost": 25000, "cps": 60, "weekly_bonus": 0, "image": "default.png"},
-    "sokolova": {"name": "Соколова", "description": "+15 кликов в секунду", "cost": 800, "cps": 15, "weekly_bonus": 0, "image": "default.png"},
-    "kozhukhov": {"name": "Кожухов", "description": "+1 клик за клик", "cost": 10, "cpc": 1, "weekly_bonus": 0, "image": "default.png"},
-    "novikov": {"name": "Новиков", "description": "+70 кликов в секунду", "cost": 10000, "cps": 70, "weekly_bonus": 0, "image": "default.png"},
-    "harach": {"name": "Харач", "description": "+2 клика в секунду и +10000 бонусов в неделю", "cost": 15000, "cps": 2, "weekly_bonus": 10000, "image": "default.png"},
-    "volkov": {"name": "Волков", "description": "+5 кликов в секунду", "cost": 13500, "cps": 5, "weekly_bonus": 0, "image": "default.png"}
-}
 
-upgrade_names = list(upgrades_info.keys())
+
 
 def give_weekly_bonus(db):
     now = datetime.datetime.now()
