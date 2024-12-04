@@ -75,40 +75,28 @@
             <h2>Магазин улучшений</h2>
             <button id="close-store">Закрыть магазин</button>
             <div class="store-item">
-                <div id="upgrade-fedorov">
-
-                </div>
+                <div id="upgrade-fedorov"></div>
             </div>
             <div class="store-item">
-                <div id="upgrade-korneeva">
-
-                </div>
+                <div id="upgrade-korneeva"></div>
             </div>
             <div class="store-item">
-                <div id="upgrade-epihin">
-
-                </div>
+                <div id="upgrade-epihin"></div>
             </div>
             <div class="store-item">
-                <div id="upgrade-zharkova">
-                </div>
+                <div id="upgrade-zharkova"></div>
             </div>
             <div class="store-item">
-                <div id="upgrade-sokolova">
-                </div>
+                <div id="upgrade-sokolova"></div>
             </div>
             <div class="store-item">
-                <div id="upgrade-kozhuhov">
-
-                </div>
+                <div id="upgrade-kozhuhov"></div>
             </div>
             <div class="store-item">
-                <div id="upgrade-novikov">
-                </div>
+                <div id="upgrade-novikov"></div>
             </div>
             <div class="store-item">
-                <div id="upgrade-volkov">
-                </div>
+                <div id="upgrade-volkov"></div>
             </div>
         </div>
         <div id="bonus-message" class="hidden">Бонус!</div>
@@ -127,18 +115,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
         "volkov": { cost: 13500, owned: 0, effect: 100, img: 'volkov.jpg' }
     };
     let autoClickerInterval;
-    loadGame();
-    const hamsterContainer = document.querySelector('.hamster-container');
-    hamsterContainer.addEventListener("click", clickHamster);
-    const openStoreButton = document.getElementById('open-store');
-    const store = document.getElementById('store');
-    const closeStoreButton = document.getElementById('close-store');
-    openStoreButton.addEventListener('click', () => {
-        store.classList.remove('hidden');
-    });
-    closeStoreButton.addEventListener('click', () => {
-        store.classList.add('hidden');
-    });
+
+    function updateScoreDisplay() {
+        document.getElementById('score').textContent = score;
+    }
 
     function renderShopItem(upgradeId, name, description, cost, img) {
         const upgradeDiv = document.getElementById(`upgrade-${upgradeId}`);
@@ -161,12 +141,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 description = `Effect : ${effect}, level : ${upgrade.owned}`;
                 break;
             case "kozhuhov":
-                description = `Bonus per Click :  ${perClick},  level :  ${owned}`;
+                description = `Bonus per Click :  ${perClick},  level :  ${upgrade.owned}`;
                 break;
         }
         renderShopItem(upgradeId, upgradeId, description, cost, img);
         attachShopListeners();
     }
+
 
     function renderShop() {
         for (const upgradeId in upgrades) {
@@ -203,15 +184,92 @@ document.addEventListener('DOMContentLoaded', (event) => {
         updateScoreDisplay();
     }
 
+
     function startAutoClicker() {
-        clearInterval(autoClickerInterval);
-        autoClickerInterval = null;
-        let autoClickValue = 0;
+
+        if (autoClickerInterval) {
+            clearInterval(autoClickerInterval);
+             autoClickerInterval = null
+
+ }
+
+
+        let autoClickValue = 0
+ for (let upgradeId in upgrades){
+     if(upgradeId!=='kozhuhov'){
+            autoClickValue+= upgrades[upgradeId].effect * upgrades[upgradeId].owned
+
+           }
+
+         }
+          autoClickerInterval = setInterval(()=>{
+                    score+= autoClickValue
+                  updateScoreDisplay()
+
+
+                saveGame()
+            },1000)
+
+    }
+
+
+
+
+  document.addEventListener('DOMContentLoaded', (event) => {
+    let score = 0;
+    let upgrades = {
+        "fedorov": { cost: 2500, owned: 0, effect: 200, img: 'fedorov.jpg' },
+        "korneeva": { cost: 5000, owned: 0, effect: 500, img: 'korneeva.jpg' },
+        "epihin": { cost: 1000, owned: 0, effect: 100, img: 'epihin.jpg' },
+        "zharkova": { cost: 25000, owned: 0, effect: 500, img: 'zharkova.jpg' },
+        "sokolova": { cost: 800, owned: 0, effect: 20, img: 'sokolova.jpg' },
+        "kozhuhov": { cost: 700, owned: 0, perClick: 1, img: 'kozhuhov.jpg' },
+        "novikov": { cost: 10000, owned: 0, effect: 700, img: 'novikov.jpg' },
+        "volkov": { cost: 13500, owned: 0, effect: 100, img: 'volkov.jpg' }
+    };
+    let autoClickerInterval;
+
+    // ... (other functions: updateScoreDisplay, renderShopItem, updateShop)
+
+    function renderShop() {
         for (const upgradeId in upgrades) {
+            const { img, effect, cost, perClick } = upgrades[upgradeId];
+            let description;
+            let upgradeItem;
+            switch (upgradeId) {
+                case "fedorov":
+                case "korneeva":
+                case "epihin":
+                case "zharkova":
+                case "sokolova":
+                case "novikov":
+                case "volkov":
+                    description = `Effect: ${effect} level : 0`;
+                    upgradeItem = `<img src="${img}" alt="${upgradeId}" width="50"> <h3>${upgradeId}</h3> <p>${description}</p> <button id="btn-${upgradeId}" data-upgrade="${upgradeId}" data-cost="${cost}">Купить за ${cost}</button>`;
+                    break;
+                case "kozhuhov":
+                    description = `Bonus per click : ${perClick}, level: 0`;
+                    upgradeItem = `<img src="${img}" alt="${upgradeId}" width="50"> <h3>${upgradeId}</h3> <p>${description}</p> <button id="btn-${upgradeId}" data-upgrade="${upgradeId}" data-cost="${cost}">Купить за ${cost}</button>`;
+                    break;
+            }
+            document.getElementById(`upgrade-${upgradeId}`).innerHTML = upgradeItem;
+        }
+        attachShopListeners();
+    }
+
+    function startAutoClicker() {
+        if (autoClickerInterval) {
+            clearInterval(autoClickerInterval);
+            autoClickerInterval = null;
+        }
+
+        let autoClickValue = 0;
+        for (let upgradeId in upgrades) {
             if (upgradeId !== 'kozhuhov') {
                 autoClickValue += upgrades[upgradeId].effect * upgrades[upgradeId].owned;
             }
         }
+
         autoClickerInterval = setInterval(() => {
             score += autoClickValue;
             updateScoreDisplay();
@@ -247,6 +305,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 
+
     function loadGame() {
         const savedGame = localStorage.getItem("hamsterCombatSave");
         if (savedGame) {
@@ -276,8 +335,18 @@ document.addEventListener('DOMContentLoaded', (event) => {
         localStorage.setItem('hamsterCombatSave', JSON.stringify(gameData));
     }
 
+
+
+    const openStoreButton = document.getElementById('open-store');
+    const store = document.getElementById('store');
+    const closeStoreButton = document.getElementById('close-store');
+    openStoreButton.addEventListener('click', () => {
+        store.classList.remove('hidden');
+    });
+    closeStoreButton.addEventListener('click', () => {
+        store.classList.add('hidden');
+    });
+
+
     loadGame();
 });
-    </script>
-</body>
-</html>
