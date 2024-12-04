@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oriox Clicker</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .clicker {
+            border: 2px solid green;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            width: 200px;
+        }
+        .clicker img{
+            width: 100px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        .upgrades {
+            width: 400px;
+        }
+        .upgrade-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+        }
+        .upgrade-item img{
+            width: 50px;
+            height: auto;
+            margin-right: 10px;
+        }
+        .upgrade-info {
+            flex-grow: 1;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+    </style>
+</head>
+<body>
+    <h1>Oriox Clicker</h1>
+    <div class="container">
+        <div class="clicker">
+            <img src="https://png.pngtree.com/png-clipart/20230420/original/pngtree-3d-click-icon-png-image_9002341.png" alt="Default Click Image">
+            <div> Количество ориоксов: <span id="orioxs">0</span></div>
+            <div> Ориоксов в секунду: <span id="orioxsPerSecond">0</span></div>
+        </div>
+        <div class="upgrades">
+            <h2>Улучшения</h2>
+            <div id="upgrades-list"></div>
+        </div>
+    </div>
+
+    <script>
+        let orioxs = 0;
+        let orioxsPerSecond = 0;
+        let orioxsPerClick = 1;
+
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.MainButton.text = "Закрыть";
+        tg.MainButton.show();
+
+        const upgrades = [
+            { id: 'fedorov', name: 'Федоров Стр', description: 'Профессионал своего дела', orioxsPerSecond: 200, cost: 2500, image: 'https://digital.miet.ru/upload/main/e38/efpr.png'},
+            { id: 'korneeva', name: 'Корнеева Мария', description: 'Один из лучших преподов', orioxsPerSecond: 500, cost: 5000 , image:'https://digital.miet.ru/upload/main/5a8/kma.png' },
+            { id: 'epihin', name: 'Епихин', description: 'Расскажет вам истории', orioxsPerSecond: 100, cost: 1000, image: 'https://digital.miet.ru/upload/main/782/evg.png' },
+            { id: 'zharkova', name: 'Жаркова', description: 'Человек занятой', orioxsPerSecond: 500, cost: 25000 , image: 'https://digital.miet.ru/upload/main/acb/zhiv.png'},
+            { id: 'sokolova', name: 'Соколова', description: 'Позитивный человек', orioxsPerSecond: 20, cost: 800, image: 'https://digital.miet.ru/upload/main/4f2/sa.png' },
+            { id: 'kozhuhov', name: 'Кожухов', description: 'Человек старой закалки', orioxsPerClick: 1, cost: 700, image : 'https://digital.miet.ru/upload/main/e9d/kev.png'},
+            { id: 'novikov', name: 'Новиков', description: 'Прекрасный преподаватель', orioxsPerSecond: 700, cost: 10000, image: 'https://digital.miet.ru/upload/main/3ae/ndm.png'},
+            { id: 'harach', name: 'Харач', description: 'Строгий препод', orioxsPerSecond: 50, weeklyBonus: 10000, cost: 15000 , image:'https://digital.miet.ru/upload/main/e93/gyum.png' },
+            { id: 'volkov', name: 'Волков', description: 'Преподаватель-пофигист', orioxsPerSecond: 100, cost: 13500, image: 'https://digital.miet.ru/upload/main/994/vab.png' }
+        ];
+
+        let purchasedUpgrades = {};
+
+       function loadDataFromStorage(){
+            const storedData = localStorage.getItem('clickerData');
+            if (storedData) {
+               const parsedData = JSON.parse(storedData);
+                 orioxs = parsedData.orioxs || 0;
+                orioxsPerSecond = parsedData.orioxsPerSecond || 0;
+                orioxsPerClick = parsedData.orioxsPerClick || 1;
+               purchasedUpgrades = parsedData.upgrades || {};
+           }
+
+           for (const upgrade of upgrades) {
+                if(purchasedUpgrades[upgrade.id]){
+                    applyUpgradeEffect(upgrade)
+                }
+            }
+
+                updateOrioxsDisplay();
+                startGeneratingOrioxs();
+                updateUpgradeButtons()
+
+        }
+
+         function saveDataToStorage(){
+             const dataToStore = {
+                    orioxs,
+                   orioxsPerSecond,
+                    orioxsPerClick,
+                     upgrades : purchasedUpgrades
+                };
+
+               localStorage.setItem('clickerData', JSON.stringify(dataToStore));
+          }
+
+          function applyUpgradeEffect(upgrade) {
+                if (upgrade.orioxsPerSecond) {
+                     orioxsPerSecond += upgrade.orioxsPerSecond;
+
+                }
+
+                 if(upgrade.orioxsPerClick) {
+                    orioxsPerClick += upgrade.orioxsPerClick;
+                 }
+
+           }
+
+        function buyUpgrade(upgrade) {
+            if (orioxs >= upgrade.cost) {
+                 orioxs -= upgrade.cost;
+                    purchasedUpgrades[upgrade.id] = true;
+                        applyUpgradeEffect(upgrade);
+                    updateUpgradeButtons();
+                         updateOrioxsDisplay();
+                    saveDataToStorage();
+                renderUpgrades();
+
+                     } else {
+                       alert("Недостаточно ориоксов!");
+                       }
+               }
+
+
+
+
+        function renderUpgrades() {
+            const upgradesList = document.getElementById('upgrades-list');
+            upgradesList.innerHTML = '';
+            upgrades.forEach(upgrade => {
+                const upgradeDiv = document.createElement('div');
+                upgradeDiv.classList.add('upgrade-item');
+
+                const upgradeImage = document.createElement('img');
+                upgradeImage.src = upgrade.image;
+                upgradeImage.alt = upgrade.name;
+                upgradeDiv.appendChild(upgradeImage);
+
+                const upgradeInfoDiv = document.createElement('div');
+                    upgradeInfoDiv.classList.add('upgrade-info');
+                    upgradeInfoDiv.innerHTML = `
+                           <h3>${upgrade.name}</h3>
+                            <p>${upgrade.description}</p>
+                             <p>Стоимость: <span id="cost-${upgrade.id}">${upgrade.cost}</span></p>
+                     `;
+                upgradeDiv.appendChild(upgradeInfoDiv);
+
+                const buyButton = document.createElement('button');
+                    buyButton.id = `buy-${upgrade.id}`;
+                   buyButton.textContent = purchasedUpgrades[upgrade.id] ? 'Куплено' : 'Купить';
+                buyButton.disabled = purchasedUpgrades[upgrade.id];
+                 buyButton.onclick = () => buyUpgrade(upgrade);
+                    upgradeDiv.appendChild(buyButton);
+
+                       upgradesList.appendChild(upgradeDiv);
+
+                       });
+                    }
+
+        function updateUpgradeButtons() {
+                upgrades.forEach(upgrade =>{
+                   const button  =  document.getElementById(`buy-${upgrade.id}`);
+                   if(button) {
+                      button.disabled = purchasedUpgrades[upgrade.id];
+                         button.textContent = purchasedUpgrades[upgrade.id] ? "Куплено" : "Купить" ;
+
+                            }
+                      });
+             }
+
+       document.querySelector('.clicker').addEventListener('click', function() {
+               orioxs += orioxsPerClick;
+           updateOrioxsDisplay();
+           saveDataToStorage()
+        });
+
+        function updateOrioxsDisplay() {
+            document.getElementById('orioxs').textContent = orioxs;
+            document.getElementById('orioxsPerSecond').textContent = orioxsPerSecond;
+       }
+
+        function startGeneratingOrioxs() {
+               setInterval(() => {
+                   orioxs += orioxsPerSecond;
+                 updateOrioxsDisplay();
+                  saveDataToStorage()
+               }, 1000);
+           }
+
+
+
+          function loadPurchasedUpgrades(){
+               loadDataFromStorage();
+            renderUpgrades();
+
+         }
+
+        window.onload = loadPurchasedUpgrades;
+
+
+
+         tg.MainButton.onClickEvent(() =>{
+            saveDataToStorage();
+            tg.close()
+         });
+
+
+
+    </script>
+
+</body>
+</html>
