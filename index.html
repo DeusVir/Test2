@@ -3,286 +3,678 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oriox Clicker</title>
+    <title>Хамстер Комбат</title>
     <style>
-        body { /* Стили для центрирования */
-            font-family: sans-serif;
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            justify-content: center; /* Центрирование по вертикали */
-            min-height: 100vh; /* Занимаем всю высоту экрана */
-            padding: 20px;
+            height: 100vh;
+            margin: 0;
         }
-
         .container {
-            display: flex;
-            width: 100%;
-            justify-content: space-around;
-            margin-bottom: 20px;
-        }
-
-        .clicker {
-            border: 2px solid green;
-            padding: 20px;
-            border-radius: 10px;
             text-align: center;
-            width: 200px; /* Фиксированная ширина кликера */
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
         }
-
-        .clicker img{
-            width: 100px;
-            height: auto;
-            margin-bottom: 10px;
+        .container:hover {
+            transform: scale(1.05);
         }
-
-        /* Стили для кнопки клика */
-        #click-button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 20px; /* Отступ сверху от контейнера */
-            margin-bottom: auto;
-        }
-
-        .upgrades {
-            width: 400px;
-        }
-
-        .upgrade-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            border: 1px solid #ccc;
-        }
-
-        .upgrade-item img {
-            width: 50px;
-            height: auto;
-            margin-right: 10px;
-        }
-
-        .upgrade-info {
-            flex-grow: 1;
-        }
-
         button {
+            padding: 15px 25px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 5px;
             background-color: #4CAF50;
             color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
+            font-size: 16px;
             cursor: pointer;
-            margin-left: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .hidden {
+            display: none;
+        }
+        .store-item {
+            margin: 15px 0;
+        }
+        #bonus-message {
+            color: #ff0000;
+            font-size: 20px;
+            margin-top: 10px;
+        }
+        .hamster-container {
+            width: 200px; /* Ширина картинки */
+            height: 200px; /* Высота картинки */
+            margin: 0 auto; /* Центрирование */
+            cursor: pointer;
+            border: 2px solid black; /* Добавляем рамку к картинке */
+            border-radius: 50%;    /* Делаем картинку круглой */
+            overflow: hidden; /* Обрезаем все, что выходит за рамку */
+
         }
 
-        button:disabled {
-            opacity: 0.6;
-            cursor: default;
-        }
+        .hamster-container img{ /* Стили картинки */
+
+          width: 100%; /* Занимаем всю ширину родителя */
+          height: 100%; /* Занимаем всю высоту родителя */
+         object-fit: cover;
+
+
+         }
+        .hidden {
+             display: none;
+
+            }
+
+            #upgrade-superClick, #upgrade-bonusTime {   /*   для суперклика  и бонусного времени */
+
+        display: none;   /*  Прячем кнопку купить, она появится  после  покупки автокликера */
+
+            }
+             #autoClickerUpgrades{
+
+                display: none;   /*  прячем блок суперклика и бонусного времени */
+
+           }
+
+
+
     </style>
 </head>
 <body>
-<h1>Oriox Clicker</h1>
+    <div class="container">
+        <h1>Хамстер Комбат</h1>
+         <div class="hamster-container">  <img src="hamster.jpg" alt="Hamster">  </div>
+        <p>Ваш счёт: <span id="score">0</span></p>
+        <button id="open-store">Открыть магазин</button>
 
-<div class="container">
-    <div class="clicker">
-         <img src="https://png.pngtree.com/png-clipart/20230420/original/pngtree-3d-click-icon-png-image_9002341.png" alt="Default Click Image">
-        <div>Количество ориоксов: <span id="orioxs">0</span></div>
-        <div>Ориоксов в секунду: <span id="orioxsPerSecond">0</span></div>
+        <div id="store" class="hidden">
+            <h2>Магазин улучшений</h2>
+            <div class="store-item">
+                <div id = upgrade-autoClicker>
+                   <h3>autoClicker</h3> <p>Effect: 1,  level : 0</p>
+                    <button id = "btn-autoClicker">Купить за 10</button>
 
+                 </div>
+           </div>
+           <div id = autoClickerUpgrades>   <!-- Скрываем  -->
+
+             <div class="store-item">
+                <div id="upgrade-superClick">
+                   <h3>superClick</h3> <p>Bonus Duration: 5000</p>
+                   <button id="btn-superClick" data-cost ="100"> Купить за 100 </button>
+
+                 </div>
+
+
+           </div>
+             <div class="store-item">
+
+                  <div id="upgrade-bonusTime">
+                     <h3>bonusTime</h3> <p>Bonus Duration : 10000, level: 0 </p>
+
+                  <button id = "btn-bonusTime"> Купить за 200</button>
+
+                    </div>
+
+            </div>
+            </div>
+
+            <div class="store-item">
+                  <div id = upgrade-multiplier>
+                       <h3>multiplier</h3> <p>Effect : 1 , level: 0</p>
+
+                        <button id="btn-multiplier"  data-cost ="50">Купить за 50 </button>
+                </div>
+
+            </div>
+
+
+
+
+        </div>
+        <div id="bonus-message" class="hidden">Бонус!</div>
     </div>
-    <div class="upgrades">
-        <h2>Улучшения</h2>
-        <div id="upgrades-list"></div>
-    </div>
-</div>
-
-<button id="click-button">Клик!</button> 
-
     <script>
-        let orioxs = 0;
-        let orioxsPerSecond = 0;
-        let orioxsPerClick = 1;
 
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.MainButton.text = "Закрыть";
-        tg.MainButton.show();
 
-        const upgrades = [
-            { id: 'fedorov', name: 'Федоров Стр', description: 'Профессионал своего дела', orioxsPerSecond: 200, cost: 2500, image: 'https://digital.miet.ru/upload/main/e38/efpr.png'},
-            { id: 'korneeva', name: 'Корнеева Мария', description: 'Один из лучших преподов', orioxsPerSecond: 500, cost: 5000 , image:'https://digital.miet.ru/upload/main/5a8/kma.png' },
-            { id: 'epihin', name: 'Епихин', description: 'Расскажет вам истории', orioxsPerSecond: 100, cost: 1000, image: 'https://digital.miet.ru/upload/main/782/evg.png' },
-            { id: 'zharkova', name: 'Жаркова', description: 'Человек занятой', orioxsPerSecond: 500, cost: 25000 , image: 'https://digital.miet.ru/upload/main/acb/zhiv.png'},
-            { id: 'sokolova', name: 'Соколова', description: 'Позитивный человек', orioxsPerSecond: 20, cost: 800, image: 'https://digital.miet.ru/upload/main/4f2/sa.png' },
-            { id: 'kozhuhov', name: 'Кожухов', description: 'Человек старой закалки', orioxsPerClick: 1, cost: 700, image : 'https://digital.miet.ru/upload/main/e9d/kev.png'},
-            { id: 'novikov', name: 'Новиков', description: 'Прекрасный преподаватель', orioxsPerSecond: 700, cost: 10000, image: 'https://digital.miet.ru/upload/main/3ae/ndm.png'},
-            { id: 'harach', name: 'Харач', description: 'Строгий препод', orioxsPerSecond: 50, weeklyBonus: 10000, cost: 15000 , image:'https://digital.miet.ru/upload/main/e93/gyum.png' },
-            { id: 'volkov', name: 'Волков', description: 'Преподаватель-пофигист', orioxsPerSecond: 100, cost: 13500, image: 'https://digital.miet.ru/upload/main/994/vab.png' }
-        ];
+document.addEventListener('DOMContentLoaded', (event) => {
 
-        let purchasedUpgrades = {};
+ let score = 0;
 
-       function loadDataFromStorage(){
-            const storedData = localStorage.getItem('clickerData');
-            if (storedData) {
-               const parsedData = JSON.parse(storedData);
-                 orioxs = parsedData.orioxs || 0;
-                orioxsPerSecond = parsedData.orioxsPerSecond || 0;
-                orioxsPerClick = parsedData.orioxsPerClick || 1;
-               purchasedUpgrades = parsedData.upgrades || {};
-           }
 
-           for (const upgrade of upgrades) {
-                if(purchasedUpgrades[upgrade.id]){
-                    applyUpgradeEffect(upgrade)
-                }
-            }
+  let upgrades = {
 
-                updateOrioxsDisplay();
-                startGeneratingOrioxs();
-                updateUpgradeButtons()
 
-        }
 
-         function saveDataToStorage(){
-             const dataToStore = {
-                    orioxs,
-                   orioxsPerSecond,
-                    orioxsPerClick,
-                     upgrades : purchasedUpgrades
-                };
+        "autoClicker": { cost: 10, owned: 0, effect: 1 },
 
-               localStorage.setItem('clickerData', JSON.stringify(dataToStore));
-          }
+        "multiplier": { cost: 50, owned: 0, effect: 1 },
 
-          function applyUpgradeEffect(upgrade) {
-                if (upgrade.orioxsPerSecond) {
-                     orioxsPerSecond += upgrade.orioxsPerSecond;
 
-                }
+         "superClick": { cost: 100, owned:0,  duration: 5000,active:false },
 
-                 if(upgrade.orioxsPerClick) {
-                    orioxsPerClick += upgrade.orioxsPerClick;
-                 }
 
-           }
 
-        function buyUpgrade(upgrade) {
-            if (orioxs >= upgrade.cost) {
-                 orioxs -= upgrade.cost;
-                    purchasedUpgrades[upgrade.id] = true;
-                        applyUpgradeEffect(upgrade);
-                    updateUpgradeButtons();
-                         updateOrioxsDisplay();
-                    saveDataToStorage();
-                renderUpgrades();
+    "bonusTime": { cost: 200, owned:0, duration: 10000 }
 
-                     } else {
-                       alert("Недостаточно ориоксов!");
-                       }
-               }
+    };
+     let clickMultiplier = 1
+
+      let autoClickerInterval ;
+
+  loadGame();
+
+
+    const hamsterContainer = document.querySelector('.hamster-container');
+
+hamsterContainer.addEventListener("click", clickHamster)
+
+
+
+  function updateScoreDisplay() {
+
+
+
+       document.getElementById('score').textContent = score;
+
+ }
+
+ function checkForBonus() {  // бонусы
+
+ }
+
+
+  function checkForMilestones(){  // достижения, которые выводят алерт
+
+
+ }
+
+
+
+    function renderShopItem(upgradeId, name, description, cost) {
+
+        let upgradeItem = document.getElementById(`upgrade-${upgradeId}`);   // получаем  div
+
+      upgradeItem.innerHTML = `<h3>${name}</h3> <p>${description}</p> <button id = 'btn-${upgradeId}' data-upgrade = '${upgradeId}' data-cost = '${cost}'>Купить за ${cost}</button>`;  //   рендерим  кнопку и  описание
 
 
 
 
-        function renderUpgrades() {
-            const upgradesList = document.getElementById('upgrades-list');
-            upgradesList.innerHTML = '';
-            upgrades.forEach(upgrade => {
-                const upgradeDiv = document.createElement('div');
-                upgradeDiv.classList.add('upgrade-item');
+   }
 
-                const upgradeImage = document.createElement('img');
-                upgradeImage.src = upgrade.image;
-                upgradeImage.alt = upgrade.name;
-                upgradeDiv.appendChild(upgradeImage);
 
-                const upgradeInfoDiv = document.createElement('div');
-                    upgradeInfoDiv.classList.add('upgrade-info');
-                    upgradeInfoDiv.innerHTML = `
-                           <h3>${upgrade.name}</h3>
-                            <p>${upgrade.description}</p>
-                             <p>Стоимость: <span id="cost-${upgrade.id}">${upgrade.cost}</span></p>
-                     `;
-                upgradeDiv.appendChild(upgradeInfoDiv);
 
-                const buyButton = document.createElement('button');
-                    buyButton.id = `buy-${upgrade.id}`;
-                   buyButton.textContent = purchasedUpgrades[upgrade.id] ? 'Куплено' : 'Купить';
-                buyButton.disabled = purchasedUpgrades[upgrade.id];
-                 buyButton.onclick = () => buyUpgrade(upgrade);
-                    upgradeDiv.appendChild(buyButton);
+    function  updateShop(upgradeId) {
+       const {cost, owned, effect, duration, active } = upgrades[upgradeId] //   получаем  данные
 
-                       upgradesList.appendChild(upgradeDiv);
 
-                       });
-                    }
 
-        function updateUpgradeButtons() {
-                upgrades.forEach(upgrade =>{
-                   const button  =  document.getElementById(`buy-${upgrade.id}`);
-                   if(button) {
-                      button.disabled = purchasedUpgrades[upgrade.id];
-                         button.textContent = purchasedUpgrades[upgrade.id] ? "Куплено" : "Купить" ;
+   let   description
 
-                            }
-                      });
-             }
 
-       document.querySelector('.clicker').addEventListener('click', function() {
-               orioxs += orioxsPerClick;
-           updateOrioxsDisplay();
-           saveDataToStorage()
-        });
+       switch (upgradeId){
 
-        function updateOrioxsDisplay() {
-            document.getElementById('orioxs').textContent = orioxs;
-            document.getElementById('orioxsPerSecond').textContent = orioxsPerSecond;
+        case  "multiplier":
+
+
+
+                    description =  `Effect :  ${effect} , level :  ${owned}`
+
+
+                break;
+             case 'autoClicker' :
+
+               description =   `Effect:  ${effect}, level:  ${owned}`
+
+
+
+                break;
+
+
+
+           case   "superClick":
+
+
+
+                   description =  `Bonus Duration:  ${duration}`
+
+              break;
+
+            case   "bonusTime":
+
+               description =  `Bonus Duration : ${duration} ,  level:  ${owned}`
+
+
+
+        default:
+                   description=''
+
+
+                break;
+
+
+
        }
 
-        function startGeneratingOrioxs() {
-               setInterval(() => {
-                   orioxs += orioxsPerSecond;
-                 updateOrioxsDisplay();
-                  saveDataToStorage()
-               }, 1000);
+
+
+         renderShopItem(upgradeId, upgradeId ,description ,cost )
+          attachShopListeners()
+
+
+  }
+
+    function renderShop(){ // один раз  вызываетя, при  первичном открытии магазина
+
+
+          for (const upgrade in upgrades){  // рендерим  все  апгрейды
+
+
+         const{cost, description, effect} = upgrades[upgrade]
+
+         renderShopItem(upgrade, upgrade , `Effect:  ${effect}  , level: 0`,cost )
+
+
+
+          }
+      attachShopListeners();  //  обработчики  для кнопок  магазина
+
+
+ }
+
+
+
+function  clickHamster() {
+ let clickValue = upgrades.multiplier.effect
+
+         if (upgrades.superClick.active) {
+
+
+
+                clickValue*=2
+
+
+  }
+
+          score += clickValue
+
+
+updateScoreDisplay();
+
+
+   }
+
+ function startAutoClicker() {
+
+
+    autoClickerInterval = setInterval(() => {  // Автокликер  работает, если куплен хотя бы 1  раз
+
+
+          score += upgrades.autoClicker.owned * upgrades.autoClicker.effect * upgrades.multiplier.effect
+
+
+    updateScoreDisplay();
+ saveGame();
+
+}, 1000);
+
+
+
+}
+
+function startSuperClick(){    //    активируем   Суперклик  после  покупки  autoclicker  (кнопка buy-autoClicker)
+
+            upgrades.superClick.active= true
+
+
+
+
+  setTimeout(() => {      // через    5 сек   выключаем
+
+
+                    upgrades.superClick.active = false
+
+
+
+
+       }, upgrades.superClick.duration)
+
+
+   }
+
+
+   function buyUpgrade(upgradeId) {
+
+
+        const  upgrade = upgrades[upgradeId]
+
+
+
+        const  cost =   Number(document.getElementById(`btn-${upgradeId}`).dataset.cost)  //   берем  cost   из  кнопки, которая  была   нажата
+
+
+
+
+       if (score >= cost) {   // проверяем хватает ли очков на покупку
+
+
+
+
+          score -= cost;
+
+
+
+
+            upgrades[upgradeId].owned++;   //   увеличиваем   level   апгрейда
+
+
+
+
+             if(upgradeId==="autoClicker" ){
+
+
+                  startAutoClicker()   //    включаем  автокликер
+
+                   if(document.getElementById('autoClickerUpgrades').style.display ==="none" ){    //   показываем  кнопку  покупки  суперклика и бонусного  времени
+
+
+
+           document.getElementById('autoClickerUpgrades').style.display = "block"
+
+
+                     document.getElementById('upgrade-superClick').style.display = 'block'
+
+                     document.getElementById('upgrade-bonusTime').style.display='block'
+
+                    }
+
+
+
+                if(!autoClickerInterval)  {  //  если  первый  раз  запускаем
+
+                  startAutoClicker();
+
+               }
+
+        } else if( upgradeId ==='bonusTime') { //   увеличивает время работы  autoClicker
+
+
+              clearInterval(autoClickerInterval)      // сбрасываем текущий  autoClicker
+                   autoClickerInterval = null            //  чтобы  не было   2   интервала
+
+
+
+
+             autoClickerInterval =  setInterval(()=>{
+
+
+           score += (upgrades.autoClicker.owned * upgrades.autoClicker.effect  + (upgrades.bonusTime.owned ))  *   upgrades.multiplier.effect     // увеличиваем   эффективность autoClicker   на  level   bonusTime   *  multiplier
+
+
+
+
+
+           updateScoreDisplay()
+
+
+  saveGame();
+
+
+            }, 1000)
+
+
+
+
+
+
+        }  else  if(upgradeId ==='superClick'  ) {
+
+
+
+                  startSuperClick();
+
+
+                if (!autoClickerInterval){  // если первый  запуск, включаем
+
+
+                  startAutoClicker();
+
+            }
+
+
+ }
+
+             else if (upgradeId ==='multiplier'){   //   если  купили множитель
+
+        }
+          updateShop(upgradeId)
+
+
+
+           updateScoreDisplay()
+
+
+
+
+
+    }else{
+
+
+
+
+                 showMessage('Not enough points');
+
+
+            }
+
+
+    }
+
+
+
+
+   function attachShopListeners(){
+
+
+  const buttons = document.querySelectorAll('[data-upgrade]')   //    находим   все кнопки  по  data атрибуту
+
+
+          buttons.forEach((btn) => {                                          //     вешаем обработчик
+
+
+
+
+      btn.addEventListener('click', () =>{
+
+
+
+
+
+             buyUpgrade(btn.dataset.upgrade);
+
+               updateScoreDisplay();
+
+
+saveGame()
+
+                 });
+
+
+
+   })
+
+
+     }
+
+
+
+
+
+
+ function loadGame() {
+
+
+
+
+        const savedGame = localStorage.getItem('hamsterCombatSave'); // Получаем сохраненную игру из localStorage
+
+
+
+ if (savedGame) {
+
+
+
+
+            const gameData = JSON.parse(savedGame);
+
+
+
+            score = gameData.score || 0;    //   восстанавливаем  игру
+
+
+              upgrades = gameData.upgrades || {      // upgrades   будут   те   же
+
+
+                autoClicker :  { cost: 10, owned: 0, effect: 1 },
+
+                   multiplier:  { cost: 50, owned: 0, effect: 1 },
+
+
+                   superClick:{ cost: 100, duration:5000, active: false},
+
+
+              bonusTime: {cost: 200,  duration:10000, owned:0}
+}
+
+
+
+   if(upgrades.autoClicker.owned > 0){
+
+
+ startAutoClicker()
+
+                    document.getElementById('autoClickerUpgrades').style.display ="block";   //   показываем блок
+
+
+
+                document.getElementById('upgrade-superClick').style.display = "block"
+
+
+                document.getElementById('upgrade-bonusTime').style.display= 'block'
+
+
+
+
+
            }
 
 
-
-          function loadPurchasedUpgrades(){
-               loadDataFromStorage();
-            renderUpgrades();
-
-         }
-
-        window.onload = loadPurchasedUpgrades;
+   renderShop()          // отображаем upgrade
 
 
 
-         tg.MainButton.onClickEvent(() =>{
-            saveDataToStorage();
-            tg.close()
-         });
-
-         document.getElementById('click-button').addEventListener('click', function() {  // обработчик для новой кнопки
-               orioxs += orioxsPerClick;
-            updateOrioxsDisplay();
-           saveDataToStorage();
-          });
+        updateScoreDisplay();      //    обновляем очки на  странице
 
 
 
-    </script>
+       }
+
+
+
+   else {
+
+
+                renderShop()        //  рендерим  счет
+
+
+   }
+
+    }
+
+
+  function saveGame(){    //  сохранение
+
+
+
+           const gameData = {
+
+
+
+
+               score,
+
+           upgrades
+
+
+
+
+        };
+
+
+
+
+
+  localStorage.setItem("hamsterCombatSave", JSON.stringify(gameData))
+
+
+    }
+
+
+
+
+     const openStoreButton = document.getElementById('open-store');    // обработчик открытия/закрытия магазина
+
+
+ openStoreButton.addEventListener('click', () => {
+
+
+
+
+        const  store = document.getElementById('store')
+
+
+
+
+        store.classList.toggle('hidden')
+
+
+
+});
+
+
+
+ if(!autoClickerInterval) {        //   чтобы   не запускать  несколько    setInterval
+
+
+         startAutoClicker();
+
+   }
+
+
+
+
+         loadGame();   // загружаем  игру  при  загрузке  страницы
+
+
+
+
+})
+
+
+
+
+      </script>
+
 
 </body>
+
+
 </html>
