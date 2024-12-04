@@ -52,7 +52,8 @@ upgrades_info = {
     "harach": {"name": "Харач", "description": "+2 клика в секунду и +10000 бонусов в неделю", "cost": 15000, "cps": 2, "weekly_bonus": 10000, "image": "default.png"},
     "volkov": {"name": "Волков", "description": "+5 кликов в секунду", "cost": 13500, "cps": 5, "weekly_bonus": 0, "image": "default.png"}
 }
-upgrade_names = list(upgrades_info.keys()) 
+upgrade_names = list(upgrades_info.keys())
+
 if 'user_id' not in st.session_state:
     st.session_state.user_id = secrets.token_hex(8)
 
@@ -67,14 +68,12 @@ if 'upgrades' not in st.session_state:
     upgrades = {}
     for index, upgrade_name in enumerate(upgrade_names):
         upgrades[upgrade_name] = user_data[2 + index]
-    st.session_state.upgrades = upgrades
+
+    st.session_state.upgrades = upgrades    
 if 'cps' not in st.session_state:
     st.session_state.cps = 0
 if 'cpc' not in st.session_state:
     st.session_state.cpc = 1
-
-
-
 
 def give_weekly_bonus(db):
     now = datetime.datetime.now()
@@ -130,45 +129,67 @@ def increment(db):
     except Exception as e:
         print(e)
 
+
 update_count_with_cps(db)
+
 
 st.title("Simple Clicker")
 st.write(f"Count: {st.session_state.count}")
 st.button("Click me!", on_click=lambda: increment(db), type="primary")
+
 st.write(f"Clicks per second: {st.session_state.cps}")
 
 placeholder = st.empty()
+
 
 i = 0
 
 def auto_click(db):
     give_weekly_bonus(db)
+
     new_cps = update_count_with_cps(db)
     global i
+
     i += 1
+
     placeholder.text(f'{st.session_state.count}')
+
+
     time.sleep(1 / new_cps if new_cps > 0 else 1)
 
-
-# Initialize autoclick and update immediately (added)
-
-
-auto_click(db)
+auto_click(db) #Added so the autoclick starts on page initialization
 
 st.experimental_rerun()
 
 st.title('Магазин')
 
+
 for upgrade_name, upgrade in upgrades_info.items():
+
+
+
+
     if st.session_state.upgrades[upgrade_name] == 0:
+
+
+
         if st.button(f"Buy {upgrade['name']} for {upgrade['cost']}"):
+
             can_buy = st.session_state.count >= upgrade['cost']
+
+
+
             if can_buy:
+
+
+
                 cursor = db.cursor()
 
                 st.session_state.upgrades[upgrade_name] = 1
 
+
                 st.session_state.count -= upgrade['cost']
+
 
                 cursor.execute("UPDATE clicks SET count = ?, {} = 1 WHERE user_id = ?".format(upgrade_name), (st.session_state.count, st.session_state.user_id))
 
@@ -177,9 +198,7 @@ for upgrade_name, upgrade in upgrades_info.items():
                 db.commit()
 
 
-
                 st.session_state.cpc += upgrade.get('cpc', 0)
-
 
 
 
@@ -187,22 +206,36 @@ for upgrade_name, upgrade in upgrades_info.items():
 
                 update_count_with_cps(db)
 
+
+
                 st.experimental_rerun()
 
 
 
 
+
             else:
+
+
+
+
                 st.write("you cannot buy this yet.")
+
+
+
+
 
 
 st.write("Your orioks now:" + str(st.session_state.count))
 
 
+
+
+
+
 for upgrade in upgrade_names:
+
+
+
     if st.session_state['upgrades'][upgrade] == 1:
         st.write("Your purchased widget: " + upgrade)
-
-
-
-
