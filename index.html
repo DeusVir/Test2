@@ -5,7 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Хамстер Комбат</title>
     <style>
-        /* ... (styles) */
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+        }
+        .container:hover {
+            transform: scale(1.05);
+        }
+        button {
+            padding: 15px 25px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .hidden {
+            display: none;
+        }
+        .store-item {
+            margin: 15px 0;
+        }
+        #bonus-message {
+            color: #ff0000;
+            font-size: 20px;
+            margin-top: 10px;
+        }
+        .hamster-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            cursor: pointer;
+            border: 2px solid black;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        .hamster-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
@@ -16,69 +73,46 @@
         <button id="open-store">Открыть магазин</button>
         <div id="store" class="hidden">
             <h2>Магазин улучшений</h2>
-            <button id="close-store">Закрыть магазин</button> <--- Кнопка выхода
+            <button id="close-store">Закрыть магазин</button>
             <div class="store-item">
                 <div id="upgrade-fedorov">
-                    <h3>fedorov</h3> <p>Effect: 200, level: 0</p><img src="fedorov.jpg" alt="fedorov" width="50">
-                    <button id="btn-fedorov" data-upgrade="fedorov" data-cost="2500">Купить за 2500</button>
+
                 </div>
-            </div>
             </div>
             <div class="store-item">
                 <div id="upgrade-korneeva">
-                    </div>
-           </div>
-        </div>
 
                 </div>
-             </div>
-
-
+            </div>
             <div class="store-item">
-                  <div id = upgrade-novikov>
-                   </div>
-
-           </div>
-
-
-
-
- <div class="store-item">
-
-
-
-    <div id = "upgrade-epihin">
-
-
-
+                <div id="upgrade-epihin">
 
                 </div>
-
-
-
-
             </div>
-
-
-             <div  class ="store-item">
-
-
-
-
-                <div  id = upgrade-volkov>
-
-                  </div>
-
-
+            <div class="store-item">
+                <div id="upgrade-zharkova">
+                </div>
             </div>
+            <div class="store-item">
+                <div id="upgrade-sokolova">
+                </div>
+            </div>
+            <div class="store-item">
+                <div id="upgrade-kozhuhov">
 
-
-
-
-
-<div id="bonus-message" class="hidden">Бонус!</div>
+                </div>
+            </div>
+            <div class="store-item">
+                <div id="upgrade-novikov">
+                </div>
+            </div>
+            <div class="store-item">
+                <div id="upgrade-volkov">
+                </div>
+            </div>
+        </div>
+        <div id="bonus-message" class="hidden">Бонус!</div>
     </div>
-
     <script>
 document.addEventListener('DOMContentLoaded', (event) => {
     let score = 0;
@@ -92,338 +126,158 @@ document.addEventListener('DOMContentLoaded', (event) => {
         "novikov": { cost: 10000, owned: 0, effect: 700, img: 'novikov.jpg' },
         "volkov": { cost: 13500, owned: 0, effect: 100, img: 'volkov.jpg' }
     };
-
     let autoClickerInterval;
     loadGame();
     const hamsterContainer = document.querySelector('.hamster-container');
     hamsterContainer.addEventListener("click", clickHamster);
     const openStoreButton = document.getElementById('open-store');
     const store = document.getElementById('store');
-    const closeStoreButton = document.getElementById('close-store'); // Кнопка закрытия магазина
-
-
+    const closeStoreButton = document.getElementById('close-store');
     openStoreButton.addEventListener('click', () => {
         store.classList.remove('hidden');
     });
-
-    closeStoreButton.addEventListener('click', () => {  // Обработчик закрытия магазина
+    closeStoreButton.addEventListener('click', () => {
         store.classList.add('hidden');
     });
 
-        function renderShopItem(upgradeId, name, description, cost, img) {
-               const upgradeDiv =  document.getElementById(`upgrade-${upgradeId}`)
-            upgradeDiv.innerHTML = `<img src="${img}" alt="${name}" width="50"> <h3>${name}</h3> <p>${description}</p> <button id="btn-${upgradeId}" data-upgrade="${upgradeId}" data-cost="${cost}">Купить за ${cost}</button>`;
-        }
-
-
-
-  function  updateShop(upgradeId){
-
-
-     const upgrade = upgrades[upgradeId];
-
-
-
-
- const {cost,  effect, perClick }  = upgrade
-        let img = upgrade.img
-       let  description
-
-
-     switch(upgradeId) {
-
- case "fedorov":
-            case "korneeva":
-                 case "epihin":
-                    case "zharkova":
-                         case "sokolova":
-                        case "novikov":
-            case "volkov":
-                 description = `Effect : ${effect}, level : ${upgrade.owned}`
-
-                 break;
-
-             case "kozhuhov":
-   description = `Bonus per Click :  ${perClick},  level :  ${owned}`
-                 break;
-
+    function renderShopItem(upgradeId, name, description, cost, img) {
+        const upgradeDiv = document.getElementById(`upgrade-${upgradeId}`);
+        upgradeDiv.innerHTML = `<img src="${img}" alt="${name}" width="50"> <h3>${name}</h3> <p>${description}</p> <button id="btn-${upgradeId}" data-upgrade="${upgradeId}" data-cost="${cost}">Купить за ${cost}</button>`;
     }
 
+    function updateShop(upgradeId) {
+        const upgrade = upgrades[upgradeId];
+        const { cost, effect, perClick } = upgrade;
+        let img = upgrade.img;
+        let description;
+        switch (upgradeId) {
+            case "fedorov":
+            case "korneeva":
+            case "epihin":
+            case "zharkova":
+            case "sokolova":
+            case "novikov":
+            case "volkov":
+                description = `Effect : ${effect}, level : ${upgrade.owned}`;
+                break;
+            case "kozhuhov":
+                description = `Bonus per Click :  ${perClick},  level :  ${owned}`;
+                break;
+        }
+        renderShopItem(upgradeId, upgradeId, description, cost, img);
+        attachShopListeners();
+    }
 
-
-          renderShopItem(upgradeId, upgradeId,description ,cost, img)
-
-
-attachShopListeners();
-
-   }
-
-
-        function renderShop() {
-       for (const upgradeId in upgrades) {
-
-
-
-        const { img, effect, cost, perClick } = upgrades[upgradeId];
-
-
-         let  description
-   let upgradeItem
-
-
-    switch (upgradeId) {
-
-
-        case  "fedorov":
-
-
-
-          case    "korneeva":
+    function renderShop() {
+        for (const upgradeId in upgrades) {
+            const { img, effect, cost, perClick } = upgrades[upgradeId];
+            let description;
+            let upgradeItem;
+            switch (upgradeId) {
+                case "fedorov":
+                case "korneeva":
                 case "epihin":
-
-
-
-                     case   "zharkova":
-
-
-
-                      case     "sokolova":
-
-
-
-                 case "novikov":
-                   case 'volkov':
-
-
-
-
-   description= `Effect: ${effect} level : 0`;
-                upgradeItem= `<img src = "${img}" alt ="${upgradeId} width="50"> <h3> ${upgradeId}</h3> <p> ${description} </p> <button id ="btn-${upgradeId} data-upgrade= "${upgradeId}" data-cost ="${cost}">Купить за ${cost} </button>`;
-break
-
-
-
-
-              case "kozhuhov":
-                description = `Bonus per click :  ${perClick}, level: 0`
-                upgradeItem= `<img src = "${img}" alt ="${upgradeId} width="50"> <h3> ${upgradeId}</h3> <p> ${description} </p> <button id ="btn-${upgradeId} data-upgrade= "${upgradeId}" data-cost ="${cost}">Купить за ${cost} </button>`;
-
-             break
-
- }
-
-         document.getElementById(`upgrade-${upgradeId}`).innerHTML = upgradeItem
-
-  }
-
-
-
-
-         attachShopListeners()
-
-
-
-
-}
+                case "zharkova":
+                case "sokolova":
+                case "novikov":
+                case "volkov":
+                    description = `Effect: ${effect} level : 0`;
+                    upgradeItem = `<img src="${img}" alt="${upgradeId}" width="50"> <h3>${upgradeId}</h3> <p>${description}</p> <button id="btn-${upgradeId}" data-upgrade="${upgradeId}" data-cost="${cost}">Купить за ${cost}</button>`;
+                    break;
+                case "kozhuhov":
+                    description = `Bonus per click : ${perClick}, level: 0`;
+                    upgradeItem = `<img src="${img}" alt="${upgradeId}" width="50"> <h3>${upgradeId}</h3> <p>${description}</p> <button id="btn-${upgradeId}" data-upgrade="${upgradeId}" data-cost="${cost}">Купить за ${cost}</button>`;
+                    break;
+            }
+            document.getElementById(`upgrade-${upgradeId}`).innerHTML = upgradeItem;
+        }
+        attachShopListeners();
+    }
 
     function clickHamster() {
-
-
-
-        let clickValue = 1;       //    начальное   значение    клика    1
-
-
-         if (upgrades.kozhuhov.owned >= 1) {
-clickValue += upgrades.kozhuhov.perClick * upgrades.kozhuhov.owned      //    эффект  Кожухова
-
- }
-
-
- score+= clickValue
-
-
-  updateScoreDisplay()
-}
-
-
-
-function startAutoClicker() {     //  запускается   при  старте   игры   и   покупке  любого  улучшения,  кроме   kozhuhov
-
-
-
-     clearInterval(autoClickerInterval)    //     сбрасываем    текущий    autoClicker
-
-      autoClickerInterval = null
-let autoClickValue = 0
-
-
-
-     for(const upgradeId in upgrades){     //    добавляем    effect  *  owned      всех   преподавателей
-
-
-
-
-
-            if(upgradeId !=='kozhuhov' ){     //       кроме    Кожухова
-
-
-
-                    autoClickValue += upgrades[upgradeId].effect * upgrades[upgradeId].owned
-
-
-
-             }
-
-
-      }
-
-
- autoClickerInterval =  setInterval(()=>{
-
-
-
-
-             score+= autoClickValue   //    увеличиваем очки  с  помощью  autoClickValue
-
-
-updateScoreDisplay();
-
-         saveGame();
-
-
- }, 1000)
+        let clickValue = 1;
+        if (upgrades.kozhuhov.owned >= 1) {
+            clickValue += upgrades.kozhuhov.perClick * upgrades.kozhuhov.owned;
+        }
+        score += clickValue;
+        updateScoreDisplay();
     }
 
-
-
+    function startAutoClicker() {
+        clearInterval(autoClickerInterval);
+        autoClickerInterval = null;
+        let autoClickValue = 0;
+        for (const upgradeId in upgrades) {
+            if (upgradeId !== 'kozhuhov') {
+                autoClickValue += upgrades[upgradeId].effect * upgrades[upgradeId].owned;
+            }
+        }
+        autoClickerInterval = setInterval(() => {
+            score += autoClickValue;
+            updateScoreDisplay();
+            saveGame();
+        }, 1000);
+    }
 
     function buyUpgrade(upgradeId) {
-       const cost = upgrades[upgradeId].cost
-
-
-  if (score >= cost){
-
-          score -= cost
-           upgrades[upgradeId].owned ++
-
-
-        updateShop(upgradeId)
-        updateScoreDisplay()
-
-              if (upgradeId!=='kozhuhov')   { //  если это не кожухов запускаем  autoClicker
-
-       startAutoClicker();    //    перезапускаем  autoClicker
-
+        const cost = upgrades[upgradeId].cost;
+        if (score >= cost) {
+            score -= cost;
+            upgrades[upgradeId].owned++;
+            updateShop(upgradeId);
+            updateScoreDisplay();
+            if (upgradeId !== 'kozhuhov') {
+                startAutoClicker();
+            }
+            alert("Успешно приобретено");
+            saveGame();
+        } else {
+            alert("Недостаточно очков!");
         }
-        alert("Успешно приобретено")
-   saveGame()
-
-
- }  else{
-
-
-
-
-           alert("Недостаточно очков!")
-      }
-
-
-   }
-    function attachShopListeners() {
-  const upgradeButtons = document.querySelectorAll('[data-upgrade]')
-
-       upgradeButtons.forEach(button =>{
-              button.addEventListener('click', ()=>{
-                   const upgradeType = button.dataset.upgrade
-               buyUpgrade(upgradeType)
-                updateScoreDisplay()
-                   })
-        })
-
-
-
     }
 
+    function attachShopListeners() {
+        const upgradeButtons = document.querySelectorAll('[data-upgrade]');
+        upgradeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const upgradeType = button.dataset.upgrade;
+                buyUpgrade(upgradeType);
+                updateScoreDisplay();
+            });
+        });
+    }
 
-function loadGame() {
-       const savedGame = localStorage.getItem("hamsterCombatSave")
+    function loadGame() {
+        const savedGame = localStorage.getItem("hamsterCombatSave");
+        if (savedGame) {
+            const gameData = JSON.parse(savedGame);
+            score = gameData.score || 0;
+            upgrades = gameData.upgrades || {
+                "fedorov": { cost: 2500, owned: 0, effect: 200, img: 'fedorov.jpg' },
+                "korneeva": { cost: 5000, owned: 0, effect: 500, img: 'korneeva.jpg' },
+                "epihin": { cost: 1000, owned: 0, effect: 100, img: 'epihin.jpg' },
+                "zharkova": { cost: 25000, owned: 0, effect: 500, img: 'zharkova.jpg' },
+                "sokolova": { cost: 800, owned: 0, effect: 20, img: 'sokolova.jpg' },
+                "kozhuhov": { cost: 700, owned: 0, perClick: 1, img: 'kozhuhov.jpg' },
+                "novikov": { cost: 10000, owned: 0, effect: 700, img: 'novikov.jpg' },
+                "volkov": { cost: 13500, owned: 0, effect: 100, img: 'volkov.jpg' }
+            };
+        }
+        renderShop();
+        updateScoreDisplay();
+        startAutoClicker();
+    }
 
+    function saveGame() {
+        const gameData = {
+            score,
+            upgrades
+        };
+        localStorage.setItem('hamsterCombatSave', JSON.stringify(gameData));
+    }
 
-if(savedGame){
-
-
-
-             const gameData = JSON.parse(savedGame)
-        score =  gameData.score || 0
-          upgrades =  gameData.upgrades || {
-
-                  "fedorov": { cost: 2500, owned: 0, effect: 200, img: 'fedorov.jpg' },
-
-
-            "korneeva": { cost: 5000, owned: 0, effect: 500, img: 'korneeva.jpg' },
-
-
-
-
-           "epihin": { cost: 1000, owned: 0, effect: 100, img: 'epihin.jpg' },
-    "zharkova": { cost: 25000, owned: 0, effect: 500, img: 'zharkova.jpg' },
-
-"sokolova": { cost: 800, owned: 0, effect: 20, img: 'sokolova.jpg' },
-
-
-          "kozhuhov": { cost: 700, owned: 0, perClick: 1, img: 'kozhuhov.jpg' },
-             "novikov": { cost: 10000, owned: 0, effect: 700, img: 'novikov.jpg' },
-        "volkov": { cost: 13500, owned: 0, effect: 100, img: 'volkov.jpg' }
-
-
-
-            }
-
-
-
-
-  }
-
-  renderShop()
-
-
- updateScoreDisplay()
-    startAutoClicker()
-
- }
-
-function saveGame(){
-
-
-
-     const gameData = {
-
-
-
-
-         score,
-
-         upgrades
-
-  };
-
-
-
-
-  localStorage.setItem('hamsterCombatSave', JSON.stringify(gameData));
-
-
-
- }
-
-
-        loadGame()
-   });
-
-
-
+    loadGame();
+});
     </script>
-
-
 </body>
 </html>
