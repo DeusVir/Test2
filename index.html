@@ -5,35 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oriox Clicker</title>
     <style>
-        body {
+        body { /* Стили для центрирования */
             font-family: sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center; /* Центрирование по вертикали */
+            min-height: 100vh; /* Занимаем всю высоту экрана */
             padding: 20px;
         }
+
         .container {
             display: flex;
             width: 100%;
             justify-content: space-around;
             margin-bottom: 20px;
         }
+
         .clicker {
             border: 2px solid green;
             padding: 20px;
             border-radius: 10px;
             text-align: center;
-            cursor: pointer;
-            width: 200px;
+            width: 200px; /* Фиксированная ширина кликера */
         }
+
         .clicker img{
             width: 100px;
             height: auto;
             margin-bottom: 10px;
         }
+
+        /* Стили для кнопки клика */
+        #click-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px; /* Отступ сверху от контейнера */
+            margin-bottom: auto;
+        }
+
         .upgrades {
             width: 400px;
         }
+
         .upgrade-item {
             display: flex;
             align-items: center;
@@ -43,14 +62,17 @@
             cursor: pointer;
             border: 1px solid #ccc;
         }
-        .upgrade-item img{
+
+        .upgrade-item img {
             width: 50px;
             height: auto;
             margin-right: 10px;
         }
+
         .upgrade-info {
             flex-grow: 1;
         }
+
         button {
             background-color: #4CAF50;
             color: white;
@@ -60,6 +82,7 @@
             cursor: pointer;
             margin-left: 10px;
         }
+
         button:disabled {
             opacity: 0.6;
             cursor: default;
@@ -67,18 +90,22 @@
     </style>
 </head>
 <body>
-    <h1>Oriox Clicker</h1>
-    <div class="container">
-        <div class="clicker">
-            <img src="https://png.pngtree.com/png-clipart/20230420/original/pngtree-3d-click-icon-png-image_9002341.png" alt="Default Click Image">
-            <div> Количество ориоксов: <span id="orioxs">0</span></div>
-            <div> Ориоксов в секунду: <span id="orioxsPerSecond">0</span></div>
-        </div>
-        <div class="upgrades">
-            <h2>Улучшения</h2>
-            <div id="upgrades-list"></div>
-        </div>
+<h1>Oriox Clicker</h1>
+
+<div class="container">
+    <div class="clicker">
+         <img src="https://png.pngtree.com/png-clipart/20230420/original/pngtree-3d-click-icon-png-image_9002341.png" alt="Default Click Image">
+        <div>Количество ориоксов: <span id="orioxs">0</span></div>
+        <div>Ориоксов в секунду: <span id="orioxsPerSecond">0</span></div>
+
     </div>
+    <div class="upgrades">
+        <h2>Улучшения</h2>
+        <div id="upgrades-list"></div>
+    </div>
+</div>
+
+<button id="click-button">Клик!</button> 
 
     <script>
         let orioxs = 0;
@@ -246,6 +273,12 @@
             saveDataToStorage();
             tg.close()
          });
+
+         document.getElementById('click-button').addEventListener('click', function() {  // обработчик для новой кнопки
+               orioxs += orioxsPerClick;
+            updateOrioxsDisplay();
+           saveDataToStorage();
+          });
 
 
 
